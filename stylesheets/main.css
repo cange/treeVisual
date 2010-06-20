@@ -1,0 +1,46 @@
+/**
+ * @colordef #FFCC00 yellow
+ * @colordef #7F0033 red
+ * @colordef #1C2933 dark
+ * @colordef #7F9933 green
+ * #C3D96C green light
+ */
+
+body { background-color: #EEE; }
+
+path { fill: none; }
+path[id*=bar] {
+  fill: #1C2933;
+  stroke: none;
+  stroke-width: 0;
+}
+rect {
+  stroke: #1C2933;
+  fill: #C3D96C;
+  stroke-width: 1;
+  opacity: .9;
+}
+rect[id*=active] {
+  fill: #1C2933;
+}
+
+.js #texts li { 
+  color: #000;
+  display: block;
+  position: absolute;
+  font-family: Arial, Verdana, Sans;
+  font-size: 13px;
+  padding: 5px 10px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.js #texts a { color: #7F0033; }
+.js #texts a:hover { text-decoration: none; }
+.js #texts .active { color: #fff; }
+.js #texts .active a { color: #7F9933; }
+.js #texts .active a:visited { color: #C3D96C; }
+
+.js #texts p { font-size: 11px; }
+.js #texts p a { color: #FC0; }
+.js #texts .active p a:visited { color: #FE0; }

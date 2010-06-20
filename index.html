@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Raphael - SVG</title>
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.1/build/reset/reset-min.css" />
+    <link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
+  </head>
+  <body>
+    <div id="canvas"></div>
+    <ul id="texts">
+      <li id="ws" class="active" data-binds="bo cs mq pp pm">
+        <h1><a href="#">myWebshop</a></h1>
+          <p>company-webshop.com</p>
+          <p>debug on port <strong>34904</strong></p>
+        </div>
+      </li>
+      <li id="bo" class="active" data-binds="ws pp">
+        <h1><a href="">myOffice</a></h1>
+          <p>debug on port <strong>34912</strong></p>
+        </div>
+      </li>
+      <li id="mq" data-binds="cs pp">
+        <h1><a href="#">myQueue</a></h1>
+          <p>admin</p>
+        </div>
+      </li>
+      <li id="cs" class="active">
+        <h1><a href="#">mySearch</a></h1>
+          <p>debug on port <strong>32320</strong></p>
+        </div>
+      </li>
+      <li id="pp">
+        <h1><a href="#">myPayment</a></h1>
+          <p>debug on port <strong>32320</strong></p>
+        </div>
+      </li>
+      <li id="pm" class="active" data-binds="pp">
+        <h1><a href="#">myPropManagement</a></h1>
+          <p>debug on port <strong>34952</strong></p>
+          <p>username/password: admin/admin</p>
+          <p><a href="#">foo</a></p>
+        </div>
+      </li>
+    </ul>
+    
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/jquery.inherit.js"></script>
+    <script type="text/javascript" src="http://github.com/DmitryBaranovskiy/raphael/raw/master/raphael.js"></script>
+    <script type="text/javascript" src="javascripts/graffle.js"></script>
+    <script type="text/javascript" src="javascripts/jsvg.js"></script>
+    <script type="text/javascript" src="javascripts/application.js"></script>
+    <script type="text/javascript">
+    $(function () {
+      window.application = new Application('canvas');
+    });
+    </script>
+  </body>
+</html>
