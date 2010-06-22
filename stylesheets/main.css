@@ -5,9 +5,24 @@
  * @colordef #7F9933 green
  * #C3D96C green light
  */
+/** @node resets */
+body { 
+  background-color: #EEE; 
+  font-family: sans-serif,arial,helvetica; 
+  font-size: 1em;
+}
+strong{ font-weight:bold; }
+ul { padding:0 }
+li { 
+  list-style: none;
+  padding-bottom: 0.4em;
+}
+small{ padding-left: 2em }
 
-body { background-color: #EEE; }
 
+/**
+ * @section SVGElements
+ */
 path { fill: none; }
 path[id*=bar] {
   fill: #1C2933;
@@ -19,11 +34,16 @@ rect {
   fill: #C3D96C;
   stroke-width: 1;
   opacity: .9;
+  padding: 10px 10px;
+  margin: 60px 120px;
 }
-rect[id*=active] {
+rect[id*=active], 
+rect[id$=bar] {
   fill: #1C2933;
 }
-
+/**
+ * Styles for the case is JavaScript enabled.
+ */
 .js #texts li { 
   color: #000;
   display: block;
@@ -37,10 +57,10 @@ rect[id*=active] {
 }
 .js #texts a { color: #7F0033; }
 .js #texts a:hover { text-decoration: none; }
-.js #texts .active { color: #fff; }
-.js #texts .active a { color: #7F9933; }
-.js #texts .active a:visited { color: #C3D96C; }
+.js #texts .active { color: #CCC; }
+.js #texts .active a { color: #C3D96C; }
+.js #texts .active a:visited { color: #7F9933; }
 
 .js #texts p { font-size: 11px; }
-.js #texts p a { color: #FC0; }
-.js #texts .active p a:visited { color: #FE0; }
+.js #texts .active p a{ color: #FC0; }
+.js #texts .active p a:visited { color: #FF0; }
