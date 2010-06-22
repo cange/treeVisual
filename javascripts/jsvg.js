@@ -39,7 +39,7 @@ jSvg.config = {
   path: {
     fill: jSvg.colors.DARK+'|4',
     stroke: jSvg.colors.DARK,
-	  strokeSize:'|3'
+    strokeSize:'|3'
   }
 };
 /**
@@ -57,15 +57,46 @@ jSvg.Box = $.inherit({
 
   create: function (paper, data, $content) {
     this.paper = paper;
+    
     this.box = paper.rect(0, 0, 0, 0, this.radius);
-    this.$text = $content;
     this.box.node.id = data.id + '_box' + (data.status ? '_active' : '');
-    this.bar = paper.path('');
-    this.group = paper.set();
-    this.group.push(this.box, this.panel);
+    
+    this.$text = $content;
+    
+    this.bar = paper.rect(0, 0, 0, 0);
+    this.bar.node.id = data.id + '_bar';
     
     this.data = data;
+    this.paperPosition = $(this.paper.canvas).parent().position();
+    this.box.style = this.getSpaces();
     this.position(0, 0);
+  },
+  
+  /**
+   * @return {object} Returns an object with margin an padding box properties.
+   */
+  getSpaces: function () {
+    var $box = $(this.box.node);
+    
+    return {
+      margin: {
+        horizontal: this._convertToInt($box.css('marginLeft')),
+        vertical: this._convertToInt($box.css('marginTop'))
+      },
+      padding: {
+        horizontal: this._convertToInt($box.css('paddingLeft')),
+        vertical: this._convertToInt($box.css('paddingTop'))
+      }
+    };
+  },
+  
+  /**
+   * Convert a string <code>"50px"</code> to a number <code>50</code>.
+   * @retutrn {int} Return a  number is styleProprerty a valid string, otherwise 
+   *     return 0. 
+   */
+  _convertToInt: function (string) {
+    return typeof string == 'string' && string.length > 0 ? parseInt(string, 10) : 0;
   },
 
   /**
@@ -76,12 +107,10 @@ jSvg.Box = $.inherit({
     var $text = this.$text,
     x = parseInt($text.css('left'), 10),
     y = parseInt($text.css('top'), 10),
-    paddingHorizointal = $text.css('paddingLeft'),
-    paddingVertical = $text.css('paddingTop'),
-    paddingHorizointal = paddingHorizointal.length > 0 ? parseInt(paddingHorizointal, 10) * 2 : 0,
-    paddingVertical = paddingVertical.length > 0 ? parseInt(paddingVertical, 10) * 2 : 0,
-    width = $text.width() + paddingHorizointal,
-    height = $text.height() + paddingVertical;
+    paddingH = this._convertToInt($text.css('paddingLeft')) * 2,
+    paddingV = this._convertToInt($text.css('paddingTop')) * 2,
+    width = $text.width() + paddingH,
+    height = $text.height() + paddingV;
     return {
       x: x, y: y, width: width, height: height, 
       top: x, right: y + width, bottom: y + height, left: x
@@ -114,24 +143,14 @@ jSvg.Box = $.inherit({
     var bounds = this.getTextBounds(),
     w = bounds.width,
     r = this.radius, 
-    pH = 10;
-    
-    // remove old bar 
-    this.bar.remove();
-    this.bar = this.paper.path(
-      'M' + x + ',' + (y+pH) + 
-      'V' + (y+pH-r) +
-      'S' + x + ',' + y + ',' + (x+pH-r) + ',' + y + 
-      'h' + (w-2*r) + 
-      'S' + (x+w) + ',' + y + ',' + (x+w) + ',' + (y+r) + 
-      'V' + (y+pH) + 
-      'H' + x +
-      'z'
-    )
-    this.bar.node.id = this.data.id + '_bar';
-    this.bar.toBack();
-    this.$text.css({left: x, top: y + pH/2});
-    this.box.attr({x: x, y: y, width: bounds.width, height: bounds.height + pH/2});
+    paperPosition = this.paperPosition,
+    padding = this.box.style.padding,
+    margin = this.box.style.margin,
+    pH = this.box.style.padding.horizontal;
+
+    this.bar.attr({x: x, y: y, width: bounds.width, height: pH});
+    this.$text.css({left: x + paperPosition.left, top: y + paperPosition.top + pH});
+    this.box.attr({x: x, y: y, width: bounds.width, height: bounds.height + pH});
   }
 
 });
