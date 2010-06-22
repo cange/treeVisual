@@ -33,7 +33,7 @@ var Application = $.inherit({
       // define the relative coordinates
       this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
       this.oy = this.type == "rect" ? this.attr("y") : this.attr("cy");
-      this.animate({
+      box.box.animate({
         "fill-opacity": .9,
         x: bounds.x - padding/2,
         y: bounds.y - padding/2,
@@ -53,7 +53,7 @@ var Application = $.inherit({
     };
     
     function up () {
-      this.animate({
+      box.box.animate({
         "fill-opacity": 1,
         x: bounds.x,
         y: bounds.y,
@@ -62,8 +62,8 @@ var Application = $.inherit({
       }, 300);
     }
     
-    box.box.attr({cursor: 'move'});
-    box.box.drag(move, dragger, up);
+    box.bar.attr({cursor: 'move'});
+    box.bar.drag(move, dragger, up);
   },
   
   /**
@@ -77,19 +77,21 @@ var Application = $.inherit({
     
     // create SVG elements
     $.map(this.datas, function (data, index) {
-      var $content = $contents.eq(index).addClass(data.id),
+      var $content = $contents.eq(index),
       box = scope.boxes[data.id] = new jSvg.Box(scope.paper, data, $content),
-      x = y = space = 50;
+      margin = box.box.style.margin,
+      x = spaceX = margin.horizontal,
+      y = spaceY = margin.vertical;
       
-  	  // position
+      // position
       if (index > 0 && boxBefore) {
-  	    var boundsBefore = boxBefore.getBoxBounds();
-  	    x = (boxBefore.data.bindings.length == data.bindings.length ? boundsBefore.right+ space : boundsBefore.left);
-  	    y = space + (data.bindings.length > 0 ? boundsBefore.bottom : 0);
-  	  }
-  	  
-  	  box.position(x, y);
-    	boxBefore = box;
+        var boundsBefore = boxBefore.getBoxBounds();
+        x = (boxBefore.data.bindings.length == data.bindings.length ? boundsBefore.right + spaceX : boundsBefore.left);
+        y = spaceY + (data.bindings.length > 0 ? boundsBefore.bottom : 0);
+      }
+      
+      box.position(x, y);
+      boxBefore = box;
     });
     
     scope.serializeConnection();
@@ -106,16 +108,16 @@ var Application = $.inherit({
       box = boxes[data.id];
       
       box.activeBinds = [];
-  	  // connections
+      // connections
       $.map(data.bindings, function (id) {
-    	  var hasAlreadyConnection = $.grep($(boxes[id].activeBinds), function (activeBind) {
-      		return activeBind == data.id;
-    	  }).length > 0;
+        var hasAlreadyConnection = $.grep($(boxes[id].activeBinds), function (activeBind) {
+          return activeBind == data.id;
+        }).length > 0;
 
         if (!hasAlreadyConnection) {
           var connection = new jSvg.Connection(scope.paper, box.box, boxes[id].box);
-    		  scope.connections.push(connection.connection);
-  	    	box.activeBinds.push(id); 
+          scope.connections.push(connection.connection);
+          box.activeBinds.push(id); 
         }
       });
       scope.initEvents(data.id);
