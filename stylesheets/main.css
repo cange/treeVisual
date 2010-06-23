@@ -7,7 +7,8 @@
  */
 /** @node resets */
 body { 
-  background-color: #EEE; 
+  background-color: #EEE;
+  color: #1C2933;
   font-family: sans-serif,arial,helvetica; 
   font-size: 1em;
 }
@@ -19,27 +20,20 @@ li {
 }
 small{ padding-left: 2em }
 
+rect { stroke: #1C2933; }
 
-/**
- * @section SVGElements
- */
-path { fill: none; }
-path[id*=bar] {
-  fill: #1C2933;
-  stroke: none;
-  stroke-width: 0;
-}
-rect {
+rect.box {
   stroke: #1C2933;
   fill: #C3D96C;
   stroke-width: 1;
   opacity: .9;
-  padding: 10px 10px;
+  padding: 0 10px;
   margin: 60px 120px;
 }
-rect[id*=active], 
-rect[id$=bar] {
-  fill: #1C2933;
+rect.active, 
+rect.bar { fill: #1C2933; }
+rect.bar { cursor: move; 
+  height: 10px;
 }
 /**
  * Styles for the case is JavaScript enabled.
