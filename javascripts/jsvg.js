@@ -123,22 +123,18 @@ jSvg.Box = $.inherit({
    * bounds values (top, right, left, bottom) of the text HTMLElement.
    */
   getContentBounds: function () {
-    if ('x' in this._contentBounds) {
-      return this._contentBounds;
-    } else {
-      var $elem = this.$elem,
-      x = this._convertToInt($elem.css('left')),
-      y = this._convertToInt($elem.css('top')),
-      paddingH = this._convertToInt($elem.css('paddingLeft')) * 2,
-      paddingV = this._convertToInt($elem.css('paddingTop')) * 2,
-      width = $elem.width() + paddingH,
-      height = $elem.height() + paddingV;
-      
-      return this._contentBounds = {
-        x: x, y: y, width: width, height: height, 
-        top: x, right: y + width, bottom: y + height, left: x
-      };
-    }
+    var $elem = this.$elem,
+    x = this._convertToInt($elem.css('left')),
+    y = this._convertToInt($elem.css('top')),
+    paddingH = this._convertToInt($elem.css('paddingLeft')) * 2,
+    paddingV = this._convertToInt($elem.css('paddingTop')) * 2,
+    width = $elem.width() + paddingH,
+    height = $elem.height() + paddingV;
+    
+    return this._contentBounds = {
+      x: x, y: y, width: width, height: height, 
+      top: x, right: x + width, bottom: y + height, left: x
+    };
   },
 
   /**

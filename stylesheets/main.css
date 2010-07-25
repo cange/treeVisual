@@ -6,6 +6,7 @@
  * #C3D96C green light
  */
 /** @node resets */
+html, 
 body { 
   background-color: #EEE;
   color: #1C2933;
@@ -30,7 +31,7 @@ rect.box {
   stroke-width: 1;
   opacity: .9;
   padding: 0 10px;
-  margin: 20px 10px;
+  margin: 30px 50px;
 }
 rect.active, 
 rect.bar { fill: #1C2933; }

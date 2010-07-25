@@ -1,3 +1,6 @@
+/**
+ * @lends Application
+ */
 var Application = $.inherit({
 
   /** @type {SVGElement} */
@@ -9,30 +12,30 @@ var Application = $.inherit({
   /** @type {jQueryObject} */
   $lists: [],
 
-  __constructor: function (selectorSvg, selectorList, direction) {
+  /**
+   * @constructor
+   * @class
+   * @param {string} [canvasSelector]
+   * @param {string} [listSelector]
+   * @param {string} [direction]
+   */
+  __constructor: function (canvasSelector, listSelector, direction) {
     var scope = this,
     $window = $(window);
     // indicator for the css
     $('html').addClass('js');
-    this.$lists = $(selectorList || 'ul');
+    this.$lists = $(listSelector || 'ul');
     this.direction = direction || 'h';
     
-    this.container = $(selectorSvg || '#canvas');
+    this.container = $(canvasSelector || '#canvas');
     this.evalData();
     this.createPanels()
-    
-    // resizing    
-    $window.resize(function () {
-//      paper.setSize($window.width(), $window.height())
-    });
-    $window.trigger('resize');
   },
     
   /**
    * Collect data in an JSON object and call an callback after that.
-   * @param {function} callback
    */
-  evalData: function (callback) {
+  evalData: function () {
     var datas = [];
     
     this.$lists.each(function (index) {
@@ -50,8 +53,6 @@ var Application = $.inherit({
       });
     });
     this.datas = datas;
-
-    //callback.apply(this);
   },
   
   /**
@@ -61,21 +62,24 @@ var Application = $.inherit({
     var scope = this,
     panelBefore = false,
     absolutePosition = 0,
-    direction = this.direction;
+    direction = this.direction,
+    minWidth = 500,
+    minHeight = 200;
 
     this.$lists.each(function (index) {
       var id = 'svg-container_' + index,
       $listItems = $(this).find('li'),
-      panels;
+      paperWidth = minWidth,
+      paperHeight = minHeight;
       
       scope.container.append('<div id="' + id + '"></div>');
-      scope.papers[index] = Raphael(id, 1000, 500);
-      panels = scope.papers[index].panels = {};
+      paper = (scope.papers[index] = Raphael(id, minWidth, minHeight));
+      paper.panels = {};
       
       // create SVG elements
       $.map(scope.datas[index], function (data, dataIndex) {
         var $listItem = $listItems.eq(dataIndex),
-        panel = (panels[data.id] = new jSvg.Box(scope.papers[index], data, $listItem)),
+        panel = (paper.panels[data.id] = new jSvg.Box(scope.papers[index], data, $listItem)),
         margin = panel.box.style.margin,
         x = spaceX = margin.horizontal,
         y = spaceY = margin.vertical,
@@ -97,11 +101,20 @@ var Application = $.inherit({
         panel.position(Math.round(x), Math.round(y));
         panelBefore = panel;
       });
+      
+      $.each(paper.panels, function (){
+        var bounds = this.getContentBounds();
+        paperWidth = bounds.right > paperWidth && bounds.right > paper.width ? bounds.right : paperWidth;
+        paperHeight = bounds.bottom > paperHeight && bounds.bottom > paper.height ? bounds.bottom : paperHeight;
+      });
+      paper.setSize(paperWidth, paperHeight);    
+      
       scope.initConnection(index);
     });
   },
-  
+
   /**
+   * @param {int} index
    * Connects the panel with each other.
    */
   initConnection: function (index) {
@@ -133,6 +146,8 @@ var Application = $.inherit({
   },
   
   /**
+   * @param {int} index
+   * @param {string} id
    * Manage the mouse events of the panels.
    * @param {string} id The identifier of the panel.
    */
