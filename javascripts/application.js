@@ -66,10 +66,11 @@ var Application = $.inherit({
     this.$lists.each(function (index) {
       var id = 'svg-container_' + index,
       $listItems = $(this).find('li'),
-      panels = scope.panels[index] = {};
+      panels;
       
       scope.container.append('<div id="' + id + '"></div>');
-      scope.papers.push(Raphael(id, 1000, 500));
+      scope.papers[index] = Raphael(id, 1000, 500);
+      panels = scope.papers[index].panels = {};
       
       // create SVG elements
       $.map(scope.datas[index], function (data, dataIndex) {
@@ -108,7 +109,7 @@ var Application = $.inherit({
     
     // add connections an events
     $.map(scope.datas[index], function (data) {
-      var panels = scope.panels[index],
+      var panels = scope.papers[index].panels,
       panel = panels[data.id];
 
       panel.activeBinds = [];
@@ -138,9 +139,8 @@ var Application = $.inherit({
   initEvents: function (index, id) {
     var scope = this,
     paper = scope.papers[index],
+    panel = paper.panels[id],
     containerPosition = $('#svg-container_' + index).position(),
-    panels = scope.panels[index],
-    panel = panels[id],
     bar = panel.bar,
     padding = 2,
     rect = 'rect',
@@ -169,7 +169,7 @@ var Application = $.inherit({
 
         var attr = this.type == rect ? {x: beginBounds.x + dx, y: beginBounds.y + dy} : {cx: beginBounds.x + dx, cy: beginBounds.y + dy};
         panel.position(isNaN(attr.x) ? 0 : attr.x, isNaN(attr.y) ? 0 : attr.y);
-
+        bounds = panel.getBoxBounds();
         for (var i = scope.connections.length; i--;) {
           paper.connection(scope.connections[i]);
         }
