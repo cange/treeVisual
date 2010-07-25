@@ -2,144 +2,208 @@ var Application = $.inherit({
 
   /** @type {SVGElement} */
   paper: {},
-  boxes: {},
+  panels: {},
   connections: [],
+  papers: [],
+  
+  /** @type {jQueryObject} */
+  $lists: [],
 
-  __constructor: function (selector) {
+  __constructor: function (selectorSvg, selectorList, direction) {
+    var scope = this,
+    $window = $(window);
     // indicator for the css
     $('html').addClass('js');
+    this.$lists = $(selectorList || 'ul');
+    this.direction = direction || 'h';
     
-    var $window = $(window),
-    paper = (this.paper = Raphael(selector || "canvas", $window.width(), $window.height()));
-    this.getData(this.serialize);
+    this.container = $(selectorSvg || '#canvas');
+    this.evalData();
+    this.createPanels()
     
     // resizing    
     $window.resize(function () {
-      paper.setSize($window.width(), $window.height())
+//      paper.setSize($window.width(), $window.height())
     });
     $window.trigger('resize');
   },
-  
-  /**
-   * Manage the mouse events of the boxes.
-   * @param {string} id The identifier of the box.
-   */
-  initEvents: function (id) {
-    var box = this.boxes[id],
-    padding = 2,
-    scope = this,
-    bounds = box.getBoxBounds();
-    function dragger () {
-      // define the relative coordinates
-      this.ox = this.type == "rect" ? this.attr("x") : this.attr("cx");
-      this.oy = this.type == "rect" ? this.attr("y") : this.attr("cy");
-      this.animate({
-        "fill-opacity": .9,
-        x: bounds.x - padding/2,
-        y: bounds.y - padding/2,
-        width: bounds.width + padding,
-        height: bounds.height + padding
-      }, 150);
-    };
     
-    function move (dx, dy) {
-      var att = this.type == "rect" ? {x: this.ox + dx, y: this.oy + dy} : {cx: this.ox + dx, cy: this.oy + dy};
-      box.position(att.x, att.y);
-      bounds = box.getBoxBounds();
-      for (var i = scope.connections.length; i--;) {
-        scope.paper.connection(scope.connections[i]);
-      }
-      scope.paper.safari();
-    };
-    
-    function up () {
-      this.animate({
-        "fill-opacity": 1,
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height
-      }, 300);
-    }
-    
-    box.box.attr({cursor: 'move'});
-    box.box.drag(move, dragger, up);
-  },
-  
-  /**
-   * Create and positioned the boxes.
-   */
-  serialize: function () {
-    var scope = this,
-    boxBefore = false,
-    absolutePosition = 0,
-    $contents = $('#texts li');
-    
-    // create SVG elements
-    $.map(this.datas, function (data, index) {
-      var $content = $contents.eq(index).addClass(data.id),
-      box = scope.boxes[data.id] = new jSvg.Box(scope.paper, data, $content),
-      x = y = space = 50;
-      
-  	  // position
-      if (index > 0 && boxBefore) {
-  	    var boundsBefore = boxBefore.getBoxBounds();
-  	    x = (boxBefore.data.bindings.length == data.bindings.length ? boundsBefore.right+ space : boundsBefore.left);
-  	    y = space + (data.bindings.length > 0 ? boundsBefore.bottom : 0);
-  	  }
-  	  
-  	  box.position(x, y);
-    	boxBefore = box;
-    });
-    
-    scope.serializeConnection();
-  },
-  
-  /**
-   * Connects the box with each other.
-   */
-  serializeConnection: function () {
-    var scope = this;
-    // add connections an events
-    $.map(this.datas, function (data, index) {
-      var boxes = scope.boxes,
-      box = boxes[data.id];
-      
-      box.activeBinds = [];
-  	  // connections
-      $.map(data.bindings, function (id) {
-    	  var hasAlreadyConnection = $.grep($(boxes[id].activeBinds), function (activeBind) {
-      		return activeBind == data.id;
-    	  }).length > 0;
-
-        if (!hasAlreadyConnection) {
-          var connection = new jSvg.Connection(scope.paper, box.box, boxes[id].box);
-    		  scope.connections.push(connection.connection);
-  	    	box.activeBinds.push(id); 
-        }
-      });
-      scope.initEvents(data.id);
-    });
-  },
-  
   /**
    * Collect data in an JSON object and call an callback after that.
    * @param {function} callback
    */
-  getData: function (callback) {
+  evalData: function (callback) {
     var datas = [];
-    $('#texts li').each(function () {
-      var $elem = $(this),
-      binds = $elem.attr('data-binds');
-      binds = typeof binds != 'undefined' ? binds.split(/ /) : [];
-      datas.push({
-        id: this.id, 
-        bindings: binds, 
-        status: $elem.hasClass('active')
+    
+    this.$lists.each(function (index) {
+      var data = datas[index] = [];
+      $(this).find('li').each(function () {
+        var $listItem = $(this),
+        binds = $.trim($listItem.attr('data-binds'));
+        
+        binds = typeof binds != 'undefined' ? binds.split(/ /) : [];
+        data.push({
+          id: this.id, 
+          bindings: binds[0] == '' ? [] : binds, 
+          status: $listItem.hasClass('active')
+        });
       });
     });
     this.datas = datas;
-    callback.apply(this);
-  }
 
+    //callback.apply(this);
+  },
+  
+  /**
+   * Create and positioned the panels.
+   */
+  createPanels: function () {
+    var scope = this,
+    panelBefore = false,
+    absolutePosition = 0,
+    direction = this.direction;
+
+    this.$lists.each(function (index) {
+      var id = 'svg-container_' + index,
+      $listItems = $(this).find('li'),
+      panels = scope.panels[index] = {};
+      
+      scope.container.append('<div id="' + id + '"></div>');
+      scope.papers.push(Raphael(id, 1000, 500));
+      
+      // create SVG elements
+      $.map(scope.datas[index], function (data, dataIndex) {
+        var $listItem = $listItems.eq(dataIndex),
+        panel = (panels[data.id] = new jSvg.Box(scope.papers[index], data, $listItem)),
+        margin = panel.box.style.margin,
+        x = spaceX = margin.horizontal,
+        y = spaceY = margin.vertical,
+        bindingCounts = data.bindings.length;
+
+        // position
+        if (dataIndex > 0 && panelBefore) {
+          var boundsBefore = panelBefore.getBoxBounds(),
+          bindingCountsBefore = panelBefore.data.bindings.length;
+          if (direction == 'h') {
+            x = (bindingCountsBefore == bindingCounts ? boundsBefore.right + spaceX : boundsBefore.left);
+            y = spaceY + (bindingCounts > 0 ? boundsBefore.bottom : 0);
+          } else {
+            x = spaceX + (bindingCounts > 0 ? boundsBefore.right : 0);
+            y = (bindingCountsBefore == bindingCounts ? boundsBefore.bottom + spaceY : boundsBefore.top);
+          }
+        }
+        
+        panel.position(Math.round(x), Math.round(y));
+        panelBefore = panel;
+      });
+      scope.initConnection(index);
+    });
+  },
+  
+  /**
+   * Connects the panel with each other.
+   */
+  initConnection: function (index) {
+    var scope = this;
+    
+    // add connections an events
+    $.map(scope.datas[index], function (data) {
+      var panels = scope.panels[index],
+      panel = panels[data.id];
+
+      panel.activeBinds = [];
+      // connections
+      $.map(data.bindings, function (id) {
+        if (panels[id]) {
+          var hasAlreadyConnection = $.grep($(panels[id].activeBinds), function (activeBind) {
+            return activeBind == data.id;
+          }).length > 0;
+  
+          if (!hasAlreadyConnection && data.id != id) {
+            var connection = new jSvg.Connection(scope.papers[index], panel.box, panels[id].box);
+            scope.connections.push(connection.connection);
+            panel.activeBinds.push(id); 
+          }
+        }
+      });
+      scope.initEvents(index, data.id);
+    });
+
+  },
+  
+  /**
+   * Manage the mouse events of the panels.
+   * @param {string} id The identifier of the panel.
+   */
+  initEvents: function (index, id) {
+    var scope = this,
+    paper = scope.papers[index],
+    containerPosition = $('#svg-container_' + index).position(),
+    panels = scope.panels[index],
+    panel = panels[id],
+    bar = panel.bar,
+    padding = 2,
+    rect = 'rect',
+    fillOpacity = 'fill-opacity',
+    bounds = panel.getBoxBounds(),
+    paperBounds = {x:containerPosition.left, y:containerPosition.top, w:paper.width, h:paper.height};
+    
+    bar.drag(
+      /* onMouseMove */
+      function (dx, dy) {
+        var beginBounds = this.beginBounds,
+        diffX = dx - beginBounds.x * -1,
+        diffY = dy - beginBounds.y * -1;
+        
+        // set box range for draggable element
+        if (diffY < 0) {
+          dy = -beginBounds.y;
+        } else if (diffY + beginBounds.h - paperBounds.h > 0){
+          dy = paperBounds.h - (beginBounds.h + beginBounds.y);
+        }
+        if (diffX < 0) {
+          dx = -beginBounds.x;
+        } else if (diffX + beginBounds.w - paperBounds.w > 0){
+          dx = paperBounds.w - (beginBounds.w + beginBounds.x);
+        }
+
+        var attr = this.type == rect ? {x: beginBounds.x + dx, y: beginBounds.y + dy} : {cx: beginBounds.x + dx, cy: beginBounds.y + dy};
+        panel.position(isNaN(attr.x) ? 0 : attr.x, isNaN(attr.y) ? 0 : attr.y);
+
+        for (var i = scope.connections.length; i--;) {
+          paper.connection(scope.connections[i]);
+        }
+        paper.safari();
+      },
+      /* onMouseDrag */
+      function () {
+        // define the relative coordinates
+        this.beginBounds = {
+          x: this.type == rect ? this.attr("x") : this.attr("cx"),
+          y: this.type == rect ? this.attr("y") : this.attr("cy"),
+          w: this.attr('width'),
+          h: panel.box.attr('height')
+        };
+                
+        panel.box.animate({
+          fillOpacity: .9,
+          x: bounds.x - padding/2,
+          y: bounds.y - padding/2,
+          width: bounds.width + padding,
+          height: bounds.height + padding
+        }, 150);
+      }, 
+      /* onMouseUp */
+      function () {
+        panel.box.animate({
+          fillOpacity: 1,
+          x: bounds.x,
+          y: bounds.y,
+          width: bounds.width,
+          height: bounds.height
+        }, 300);
+      }
+    );
+  }
+  
 });

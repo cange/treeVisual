@@ -39,53 +39,106 @@ jSvg.config = {
   path: {
     fill: jSvg.colors.DARK+'|4',
     stroke: jSvg.colors.DARK,
-	  strokeSize:'|3'
-  }
+    strokeSize:'|3'
+  } 
 };
 /**
  * @param {SVGElement} paper SVG stage object.
  * @param {object} data
- * @param {jQueryObject} $content The content was displayed inside the box.
+ * @param {jQueryObject} $elem The content was displayed inside the box.
  */
 jSvg.Box = $.inherit({
 
   radius: 5,
+  /** 
+   * Contains the properties of the box HTMLElement content.
+   * @type {object} 
+   */
+  _contentBounds: {},
   
-  __constructor: function (paper, data, $content) {
-    this.create(paper, data, $content);
+  __constructor: function (paper, data, $elem) {
+    this.create(paper, data, $elem);
   },
 
-  create: function (paper, data, $content) {
+  create: function (paper, data, $elem) {
     this.paper = paper;
     this.box = paper.rect(0, 0, 0, 0, this.radius);
-    this.$text = $content;
-    this.box.node.id = data.id + '_box' + (data.status ? '_active' : '');
-    this.bar = paper.path('');
-    this.group = paper.set();
-    this.group.push(this.box, this.panel);
-    
+    this.addClass(this.box.node, 'box');    
+    this.box.style = this.getStyles();
+    this.bar = paper.rect(0, 0, 0, 0);
+    this.addClass(this.bar.node, 'bar');
+    this.bar.height = this._convertToInt($(this.bar.node).css('height'));
+    this.$elem = $elem;
     this.data = data;
+    this.paperPosition = $(this.paper.canvas).parent().position();
     this.position(0, 0);
+  
+    if (data.status) {
+      this.addClass(this.box.node, 'active');
+      this.addClass(this.bar.node, 'active');
+    }
+  },
+  
+  addClass: function (node, value) {
+    var classKey = 'class',
+    classValue = node.getAttribute(classKey);
+    
+    if (classValue != null) {
+      value += ' ' + classValue;
+    }
+
+    node.setAttribute(classKey, value);
+  },
+  
+  /**
+   * @return {object} Returns an object with margin an padding box properties.
+   */
+  getStyles: function () {
+    var $box = $(this.box.node);
+    
+    return {
+      margin: {
+        horizontal: this._convertToInt($box.css('marginLeft')),
+        vertical: this._convertToInt($box.css('marginTop'))
+      },
+      padding: {
+        horizontal: this._convertToInt($box.css('paddingLeft')),
+        vertical: this._convertToInt($box.css('paddingTop'))
+      }
+    };
+  },
+  
+  /**
+   * Convert a string <code>"50px"</code> to a number <code>50</code>.
+   * @param {string} property
+   * @retutrn {int} Return a  number is styleProprerty a valid string, otherwise 
+   *     return 0. 
+   */
+  _convertToInt: function (property) {
+    return typeof property == 'string' && property.length > 0 ? parseInt(property, 10) : 0;
   },
 
   /**
    * @return {object} Returns the typical coordinats (x, y, width, height) and the 
    * bounds values (top, right, left, bottom) of the text HTMLElement.
    */
-  getTextBounds: function () {
-    var $text = this.$text,
-    x = parseInt($text.css('left'), 10),
-    y = parseInt($text.css('top'), 10),
-    paddingHorizointal = $text.css('paddingLeft'),
-    paddingVertical = $text.css('paddingTop'),
-    paddingHorizointal = paddingHorizointal.length > 0 ? parseInt(paddingHorizointal, 10) * 2 : 0,
-    paddingVertical = paddingVertical.length > 0 ? parseInt(paddingVertical, 10) * 2 : 0,
-    width = $text.width() + paddingHorizointal,
-    height = $text.height() + paddingVertical;
-    return {
-      x: x, y: y, width: width, height: height, 
-      top: x, right: y + width, bottom: y + height, left: x
-    };
+  getContentBounds: function () {
+    if ('x' in this._contentBounds) {
+      return this._contentBounds;
+    } else {
+      var $elem = this.$elem,
+      x = this._convertToInt($elem.css('left')),
+      y = this._convertToInt($elem.css('top')),
+      paddingH = this._convertToInt($elem.css('paddingLeft')) * 2,
+      paddingV = this._convertToInt($elem.css('paddingTop')) * 2,
+      width = $elem.width() + paddingH,
+      height = $elem.height() + paddingV;
+      
+      return this._contentBounds = {
+        x: x, y: y, width: width, height: height, 
+        top: x, right: y + width, bottom: y + height, left: x
+      };
+    }
   },
 
   /**
@@ -111,31 +164,20 @@ jSvg.Box = $.inherit({
     x = Math.round(x);
     y = Math.round(y);
     
-    var bounds = this.getTextBounds(),
+    var bounds = this.getContentBounds(),
     w = bounds.width,
     r = this.radius, 
-    pH = 10;
-    
-    // remove old bar 
-    this.bar.remove();
-    this.bar = this.paper.path(
-      'M' + x + ',' + (y+pH) + 
-      'V' + (y+pH-r) +
-      'S' + x + ',' + y + ',' + (x+pH-r) + ',' + y + 
-      'h' + (w-2*r) + 
-      'S' + (x+w) + ',' + y + ',' + (x+w) + ',' + (y+r) + 
-      'V' + (y+pH) + 
-      'H' + x +
-      'z'
-    )
-    this.bar.node.id = this.data.id + '_bar';
-    this.bar.toBack();
-    this.$text.css({left: x, top: y + pH/2});
-    this.box.attr({x: x, y: y, width: bounds.width, height: bounds.height + pH/2});
+    paperPosition = this.paperPosition,
+    padding = this.box.style.padding,
+    margin = this.box.style.margin,
+    pH = this.box.style.padding.horizontal;
+
+    this.bar.attr({x: x, y: y, width: bounds.width, height: this.bar.height});
+    this.$elem.css({left: x + paperPosition.left, top: y + paperPosition.top + pH});
+    this.box.attr({x: x, y: y, width: bounds.width, height: bounds.height + pH});
   }
 
 });
-
 
 jSvg.Connection = $.inherit({
 

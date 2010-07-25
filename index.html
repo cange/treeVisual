@@ -2,57 +2,74 @@
 <html>
   <head>
     <title>Raphael - SVG</title>
-    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.8.1/build/reset/reset-min.css" />
     <link rel="stylesheet" href="stylesheets/main.css" type="text/css" media="screen" />
   </head>
   <body>
+    <h1>Server dependencies</h1>
     <div id="canvas"></div>
-    <ul id="texts">
-      <li id="ws" class="active" data-binds="bo cs mq pp pm">
-        <h1><a href="#">myWebshop</a></h1>
-          <p>company-webshop.com</p>
-          <p>debug on port <strong>34904</strong></p>
-        </div>
-      </li>
-      <li id="bo" class="active" data-binds="ws pp">
-        <h1><a href="">myOffice</a></h1>
-          <p>debug on port <strong>34912</strong></p>
-        </div>
-      </li>
-      <li id="mq" data-binds="cs pp">
-        <h1><a href="#">myQueue</a></h1>
-          <p>admin</p>
-        </div>
-      </li>
-      <li id="cs" class="active">
-        <h1><a href="#">mySearch</a></h1>
-          <p>debug on port <strong>32320</strong></p>
-        </div>
-      </li>
-      <li id="pp">
-        <h1><a href="#">myPayment</a></h1>
-          <p>debug on port <strong>32320</strong></p>
-        </div>
-      </li>
-      <li id="pm" class="active" data-binds="pp">
-        <h1><a href="#">myPropManagement</a></h1>
-          <p>debug on port <strong>34952</strong></p>
-          <p>username/password: admin/admin</p>
-          <p><a href="#">foo</a></p>
-        </div>
-      </li>
+    
+  <ul class="list">
+    <li id="ws" class="active" data-binds="mq bo">
+      <h2><strong>ws</strong> <a href="http://${SUFFIX}:$(( $WS_PORT + 2 ))/webshop/nodecorate/handlerMappingOverview.xml">Webshop url controller mapping</a></h2>
+    </li>
+    
+    <li id="mq" class="active" data-binds="ws bo">
+      <h2><strong>mq</strong> ActiveMQ</h2>
+      <p><a href="http://${SUFFIX}:$(( $ALINGHI_START_PORT + 99 ))/admin/">admin</a> / <a href="http://${SUFFIX}:$(( $ALINGHI_START_PORT + 99 ))/camel/">camel</a>
+    </li>
+    
+    <li id="bo" class="active" data-binds="mq ws">
+      <h2><strong>bo</strong> <a href="http://${SUFFIX}:$(( $BO_PORT + 2 ))/backoffice/">Backoffice</a></h2>
+      <p>(debug on port <strong>$(( $BO_PORT + 4 ))</strong>)</p>
+    </li>
+  </ul>
+  
+  <ul class="list">
+    <li id="bp" class="active" data-binds="pp">
+      <h2><strong>bp</strong> Backend processing</h2>
+      <p>(debug on port <strong>$(( $BP_PORT + 4))</strong>)</p>
+    </li>
+    
+    <li id="pp" class="" data-binds="bp">
+      <h2><strong>pp</strong> <a href="http://${SUFFIX}:$(( $PP_PORT + 2 ))/payment-processing/">payment processing</a></h2>
+      <p>(debug on port <strong>$(( $PP_PORT + 4))</strong>)</p>
+    </li>
+
+    <li id="pm" class="active" data-binds="pm">
+      <h2><strong>pm</strong> <a href="http://${SUFFIX}:$(( $PM_PORT + 2 ))/property-management/">property-management</a></h2>
+      <p>(debug on port <strong>$(( $PM_PORT + 4))</strong>)</p>
+      <p>username/password: admin/admin</p>
+    </li>
+
+    <li id="sa" class="active" data-binds="sa">
+      <h2><strong>sa</strong> <a href="http://${SUFFIX}:$(( $SA_PORT + 2 ))/simulate/">Simulators</a></h2>
+      <p>(creditcard, schufa, customer messaging endpoints, etc.)</p>
+    </li>
+    
+    <li id="tw" class="active" data-binds="tw">
+      <h2><strong>tw</strong> <a href="http://${SUFFIX}:$(( $TW_PORT + 2 ))/timewarp/servlet/TimeWarp">Time warp</a></h2>
+    </li>
+    
+    <li id="ts" class="active" data-binds="bp pm pp sa tb tw">
+      <h2><strong>ts</strong> <a href="http://${SUFFIX}:$(( $TS_PORT + 2 ))/TDSSimulator">Procurement simulator</a></h2>
+    </li>
+    
+    <li id="tb" class="active" data-binds="bp">
+      <h2><strong>tb</strong> <a href="http://${SUFFIX}:$(( $TB_PORT + 2 ))/">Procurement backoffice</a></h2>
+      <p>(debug on port <strong>$(( $TB_PORT + 4 ))</strong>)</p>
+      <p>username/password: admin/admin</p>
+    </li>
+    
     </ul>
     
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
-    <script type="text/javascript" src="javascripts/jquery.inherit.js"></script>
-    <script type="text/javascript" src="http://github.com/DmitryBaranovskiy/raphael/raw/master/raphael.js"></script>
+    <script type="text/javascript" src="javascripts/jquery-min.js"></script>
+    <script type="text/javascript" src="javascripts/jquery.inherit-min.js"></script>
+    <script type="text/javascript" src="javascripts/raphael-min.js"></script>
     <script type="text/javascript" src="javascripts/graffle.js"></script>
     <script type="text/javascript" src="javascripts/jsvg.js"></script>
     <script type="text/javascript" src="javascripts/application.js"></script>
-    <script type="text/javascript">
-    $(function () {
-      window.application = new Application('canvas');
-    });
-    </script>
+    <script type="text/javascript">$(function () { 
+      window.application = new Application('#canvas', 'ul'); 
+    });</script>
   </body>
 </html>

@@ -5,42 +5,60 @@
  * @colordef #7F9933 green
  * #C3D96C green light
  */
-
-body { background-color: #EEE; }
-
-path { fill: none; }
-path[id*=bar] {
-  fill: #1C2933;
-  stroke: none;
-  stroke-width: 0;
+/** @node resets */
+body { 
+  background-color: #EEE;
+  color: #1C2933;
+  font-family: sans-serif,arial,helvetica;
+  font-size: 12px;
 }
-rect {
+strong{ font-weight:bold; }
+ul { padding:0 }
+li { 
+  list-style: none;
+  padding-bottom: 0.4em;
+}
+h2 { font-size: 12px; }
+a { text-decoration: underline; }
+
+
+rect { stroke: #1C2933; }
+
+rect.box {
   stroke: #1C2933;
   fill: #C3D96C;
   stroke-width: 1;
   opacity: .9;
+  padding: 0 10px;
+  margin: 20px 10px;
 }
-rect[id*=active] {
-  fill: #1C2933;
+rect.active, 
+rect.bar { fill: #1C2933; }
+rect.bar { cursor: move; 
+  height: 10px;
 }
-
-.js #texts li { 
+/**
+ * Styles for the case is JavaScript enabled.
+ */
+.js ul li { 
   color: #000;
   display: block;
   position: absolute;
   font-family: Arial, Verdana, Sans;
-  font-size: 13px;
+  font-size: 11px;
   padding: 5px 10px;
   -moz-user-select: none;
   -webkit-user-select: none;
   user-select: none;
 }
-.js #texts a { color: #7F0033; }
-.js #texts a:hover { text-decoration: none; }
-.js #texts .active { color: #fff; }
-.js #texts .active a { color: #7F9933; }
-.js #texts .active a:visited { color: #C3D96C; }
+.js ul p,
+.js ul h2 { margin: 0; }
 
-.js #texts p { font-size: 11px; }
-.js #texts p a { color: #FC0; }
-.js #texts .active p a:visited { color: #FE0; }
+.js ul a { color: #7F0033; }
+.js ul a:hover { text-decoration: none; }
+.js ul .active { color: #CCC; }
+.js ul .active a { color: #C3D96C; }
+.js ul .active a:visited { color: #7F9933; }
+.js ul p { font-size: 11px; }
+.js ul .active p a{ color: #FC0; }
+.js ul .active p a:visited { color: #FF0; }
