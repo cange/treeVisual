@@ -70,7 +70,8 @@ var Application = $.inherit({
       var id = 'svg-container_' + index,
       $listItems = $(this).find('li'),
       paperWidth = minWidth,
-      paperHeight = minHeight;
+      paperHeight = minHeight
+      boxMargin = {};
       
       scope.container.append('<div id="' + id + '"></div>');
       paper = (scope.papers[index] = Raphael(id, minWidth, minHeight));
@@ -84,7 +85,8 @@ var Application = $.inherit({
         x = spaceX = margin.horizontal,
         y = spaceY = margin.vertical,
         bindingCounts = data.bindings.length;
-
+        
+        boxMargin = margin;
         // position
         if (dataIndex > 0 && panelBefore) {
           var boundsBefore = panelBefore.getBoxBounds(),
@@ -103,9 +105,9 @@ var Application = $.inherit({
       });
       
       $.each(paper.panels, function (){
-        var bounds = this.getContentBounds();
-        paperWidth = bounds.right > paperWidth && bounds.right > paper.width ? bounds.right : paperWidth;
-        paperHeight = bounds.bottom > paperHeight && bounds.bottom > paper.height ? bounds.bottom : paperHeight;
+        var bounds = this.getBoxBounds();
+        paperWidth = bounds.right > paperWidth ? bounds.right + boxMargin.horizontal : paperWidth;
+        paperHeight = bounds.bottom > paperHeight ? bounds.bottom + boxMargin.vertical : paperHeight;
       });
       paper.setSize(paperWidth, paperHeight);    
       
