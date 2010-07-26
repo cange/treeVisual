@@ -68,14 +68,14 @@ var Application = $.inherit({
     absolutePosition = 0,
     direction = this.direction,
     minWidth = 500,
-    minHeight = 200;
+    minHeight = 200,
+    boxMargin = {};
 
     this.$lists.each(function (index) {
       var id = 'svg-container_' + index,
       $listItems = $(this).find('li'),
       paperWidth = minWidth,
-      paperHeight = minHeight
-      boxMargin = {};
+      paperHeight = minHeight;
       
       scope.container.append('<div id="' + id + '"></div>');
       paper = (scope.papers[index] = Raphael(id, minWidth, minHeight));
