@@ -1,3 +1,7 @@
+/*!
+ * @author <a href="dev@psykmedia.de">Christian Angermann</a>
+ * @link Copyright (c) 2010 <a href="http://github.com/cange/treeVisual">treeVisual</a>.
+ */
 /**
  * @lends Application
  */
